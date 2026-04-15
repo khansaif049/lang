@@ -1,0 +1,67 @@
+<svg width="920" height="360" viewBox="0 0 920 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">LangGraph flow for test.py</title>
+  <desc id="desc">A simple conditional LangGraph with START going to decide_route, then branching to happy_node or serious_node, both ending at END.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f7f4ea"/>
+      <stop offset="100%" stop-color="#e6f0ea"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fffdf7"/>
+      <stop offset="100%" stop-color="#f1f7f2"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#2d4a3e"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#aab7ad" flood-opacity="0.35"/>
+    </filter>
+    <style>
+      .title { font: 700 24px Georgia, 'Times New Roman', serif; fill: #1f352c; }
+      .label { font: 600 16px Georgia, 'Times New Roman', serif; fill: #1f352c; }
+      .small { font: 400 13px Georgia, 'Times New Roman', serif; fill: #4f6459; }
+      .edge { stroke: #2d4a3e; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .edge-label { font: 600 14px Georgia, 'Times New Roman', serif; fill: #2d4a3e; }
+      .node { fill: url(#card); stroke: #385949; stroke-width: 2.5; filter: url(#shadow); }
+      .terminal { fill: #fdf5dc; stroke: #8f6d2f; stroke-width: 2.5; filter: url(#shadow); }
+      .router { fill: #eef7ef; stroke: #2d6a4f; stroke-width: 2.5; filter: url(#shadow); }
+    </style>
+  </defs>
+
+  <rect width="920" height="360" rx="28" fill="url(#bg)"/>
+  <text x="40" y="42" class="title">Simple LangGraph Flow from test.py</text>
+  <text x="40" y="68" class="small">START -&gt; decide_route -&gt; happy_node or serious_node -&gt; END</text>
+
+  <ellipse cx="90" cy="180" rx="58" ry="34" class="terminal"/>
+  <text x="90" y="186" text-anchor="middle" class="label">START</text>
+
+  <rect x="210" y="130" width="180" height="100" rx="22" class="router"/>
+  <text x="300" y="168" text-anchor="middle" class="label">decide_route</text>
+  <text x="300" y="192" text-anchor="middle" class="small">reads `mood`</text>
+  <text x="300" y="212" text-anchor="middle" class="small">sets `route`</text>
+
+  <rect x="500" y="60" width="170" height="96" rx="22" class="node"/>
+  <text x="585" y="98" text-anchor="middle" class="label">happy_node</text>
+  <text x="585" y="122" text-anchor="middle" class="small">creates cheerful</text>
+  <text x="585" y="142" text-anchor="middle" class="small">`reply`</text>
+
+  <rect x="500" y="208" width="170" height="96" rx="22" class="node"/>
+  <text x="585" y="246" text-anchor="middle" class="label">serious_node</text>
+  <text x="585" y="270" text-anchor="middle" class="small">creates calm</text>
+  <text x="585" y="290" text-anchor="middle" class="small">`reply`</text>
+
+  <ellipse cx="820" cy="180" rx="54" ry="34" class="terminal"/>
+  <text x="820" y="186" text-anchor="middle" class="label">END</text>
+
+  <path d="M 148 180 L 210 180" class="edge"/>
+  <path d="M 390 160 C 440 160, 450 108, 500 108" class="edge"/>
+  <path d="M 390 200 C 440 200, 450 256, 500 256" class="edge"/>
+  <path d="M 670 108 C 735 108, 742 165, 766 176" class="edge"/>
+  <path d="M 670 256 C 735 256, 742 195, 766 184" class="edge"/>
+
+  <text x="448" y="128" class="edge-label">route = happy</text>
+  <text x="444" y="232" class="edge-label">route = serious</text>
+
+  <rect x="36" y="292" width="332" height="42" rx="14" fill="#fffaf0" stroke="#c8b78a" stroke-width="1.5"/>
+  <text x="52" y="318" class="small">Final state contains: `name`, `mood`, `route`, and `reply`</text>
+</svg>
