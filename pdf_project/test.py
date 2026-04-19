@@ -14,37 +14,55 @@ class GraphState(TypedDict, total=False):
     is_valid:bool
     error_message:str
     advice:str
+    messages: list[str]
 
 def validate_node(state: GraphState) -> GraphState:
-    mood = state["mood"].lower()
-    name = state["name"].lower()
+    mood = state.get("mood", "").strip().lower()
+    name = state.get("name", "").strip()
+    messages = state.get("messages", [])
 
     if not name or not mood:
         return {
             "is_valid": False,
-            "error_message": "Name or mood is missing"
+            "error_message": "Name or mood is missing",
+            "messages": messages + ["validate failed"]
         }
     else:
-        return {"is_valid":True}
+        return {"is_valid":True,"messages": messages + ["validate passed"]}
 
 def error_node(state: GraphState) -> GraphState:
-    return {"final_reply": f"Error: {state['error_message']}"}
+    messages = state.get("messages", [])
+    return {
+        "final_reply": f"Error: {state['error_message']}",
+        "messages": messages + ["error reply created"],
+    }
 
 def tool_node(state:GraphState) -> GraphState:
     route = state["route"].lower()
-    # print(route,"getting_route")
+    messages = state.get("messages", [])
     if route == "happy":
-        return {"advice": "Keep this momentum going."}
+        return {
+            "advice": "Keep this momentum going.",
+            "messages": messages + ["tool advice added"],
+        }
     if route == "serious":
-        return {"advice": "Break the work into small steps."}
-    if route == "angry":
-        # print("enter_in_angry")
-        return {"advice": "Take a breath and slow down."}
+        return {
+            "advice": "Break the work into small steps.",
+            "messages": messages + ["tool advice added"],
+        }
+    return {
+        "advice": "Take a breath and slow down.",
+        "messages": messages + ["tool advice added"],
+    }
 
 def summary_node(state: GraphState) -> GraphState:
     text = state["final_reply"]
     short_text = " ".join(text.split()[:6]) + "..."
-    return {"final_reply": short_text}
+    messages = state.get("messages", [])
+    return {
+        "final_reply": short_text,
+        "messages": messages + ["summary applied"],
+    }
 
 def style_route(state: GraphState) -> str:
     # response_style = state["response_style"].lower()
@@ -56,6 +74,7 @@ def style_route(state: GraphState) -> str:
 def decide_route(state: GraphState) -> GraphState:
     mood = state["mood"].lower()
     route: Literal["happy", "serious", "angry"]
+    messages = state.get("messages", [])
 
     if mood in {"happy", "excited"}:
         route = "happy"
@@ -64,40 +83,45 @@ def decide_route(state: GraphState) -> GraphState:
     else:
         route = "serious"
 
-    # print(f"[decide_route] mood={state['mood']} -> route={route}")
-    return {"route": route}
+    return {"route": route, "messages": messages + [f"route={route}"]}
 
 
 def happy_node(state: GraphState) -> GraphState:
     reply = f"Hi {state['name']}! Aaj energy kaafi achchi lag rahi hai."
-    # print("[happy_node] cheerful response ready")
-    return {"reply": reply}
+    messages = state.get("messages", [])
+    return {"reply": reply, "messages": messages + ["happy reply created"]}
 
 
 def serious_node(state: GraphState) -> GraphState:
     reply = f"Hi {state['name']}. Chalo calmly step by step kaam karte hain."
-    # print("[serious_node] calm response ready")
-    return {"reply": reply}
+    messages = state.get("messages", [])
+    return {"reply": reply, "messages": messages + ["serious reply created"]}
 
 
 def angry_node(state:GraphState) -> GraphState:
     reply = f"Hi {state['name']}. kya bhai langgraph sikh raha hai angry mode me"
-    # print("[Angry_node] Angry response ready")
-    return {"reply":reply}
+    messages = state.get("messages", [])
+    return {"reply":reply, "messages": messages + ["angry reply created"]}
 
 def add_time_node(state: GraphState) -> GraphState:
     time_of_day = state["time_of_day"].lower()
     reply = state["reply"]
     advice = state["advice"]
+    messages = state.get("messages", [])
 
     if time_of_day == "morning":
-        return {"final_reply": f"Good morning! {reply} {advice}"}
+        final_reply = f"Good morning! {reply} {advice}"
     elif time_of_day == "afternoon":
-        return {"final_reply": f"Good afternoon! {reply} {advice}"}
+        final_reply = f"Good afternoon! {reply} {advice}"
     elif time_of_day == "night":
-        return {"final_reply": f"Good night! {reply} {advice}"}
+        final_reply = f"Good night! {reply} {advice}"
     else:
-        return {"final_reply": f"{reply} {advice}"}
+        final_reply = f"{reply} {advice}"
+
+    return {
+        "final_reply": final_reply,
+        "messages": messages + [f"time style applied: {time_of_day}"],
+    }
 
 
 
@@ -170,11 +194,13 @@ graph.add_conditional_edges(
     },
 )
 
-graph.add_edge("add_time_node",END)
 graph.add_edge("summary_node",END)
 graph.add_edge("error_node",END)
 
 app = graph.compile()
+
+print("\nBuilt-in graph view:\n")
+print(app.get_graph().draw_ascii())
 
 
 if __name__ == "__main__":
@@ -182,13 +208,20 @@ if __name__ == "__main__":
         "name": "saif",
         "mood": "angry",
         "time_of_day":"morning",
-        "response_style": "short"
+        "response_style": "short",
+        "messages": [],
     }
 
-    # result = app.invoke(initial_state)
 
+    print("\nStream output:")
     for step in app.stream(initial_state):
         print(step)
 
-    # print("\nFinal state:")
-    # print(result)
+    result = app.invoke(initial_state)
+
+    print("\nFinal messages:")
+    for msg in result["messages"]:
+        print(f"- {msg}")
+
+    print("\nFinal reply:")
+    print(result["final_reply"])
